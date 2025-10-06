@@ -1,22 +1,20 @@
-# ===== IGNORE DATASETS =====
+# === DATASETS ===
 data/**
 !data/.gitkeep
 !data/test/
 !data/train/
 !data/valid/
 
-# Ignore contents of data folders (but keep structure)
 data/test/**
 data/train/**
 data/valid/**
 
-# ===== IGNORE MODELS =====
+# === MODELS ===
 models/**
 !models/.gitkeep
-!models/labels.txt   # vẫn giữ file nhỏ
-!models/README.md    # nếu có mô tả model
+!models/labels.txt
 
-# Ignore model weights
+# Ignore large model files
 *.h5
 *.hdf5
 *.pt
@@ -25,14 +23,22 @@ models/**
 *.pkl
 *.joblib
 
-# ===== PYTHON & ENV FILES =====
+# === IGNORE SPECIFIC PYTHON FILES ===
+arrange.py
+gpu.py
+
+# === PYTHON / ENVIRONMENT ===
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 .env
 venv/
-.env/
+env/
 .DS_Store
 .ipynb_checkpoints/
 logs/
+
+# === WEB CACHE / SYSTEM ===
+node_modules/
+*.log
