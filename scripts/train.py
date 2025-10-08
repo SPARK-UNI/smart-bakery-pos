@@ -30,7 +30,7 @@ else:
 # ----------------------------
 IMG_SIZE = (224, 224)           # khớp với app.py
 BATCH_SIZE = 32
-EPOCHS = 20
+EPOCHS = 50
 SEED = 42
 
 # Thư mục dữ liệu (sửa nếu bạn dùng tên khác)
@@ -80,7 +80,7 @@ val_gen = val_datagen.flow_from_directory(
 num_classes = train_gen.num_classes
 
 # ----------------------------
-# Kiến trúc CNN “tự viết” (không dùng pretrained)
+# Kiến trúc CNN
 # ----------------------------
 def build_model(input_shape=(IMG_SIZE[0], IMG_SIZE[1], 3), num_classes=3):
     inputs = layers.Input(shape=input_shape)
@@ -131,7 +131,7 @@ model.summary()
 # Callbacks
 # ----------------------------
 early_stop = callbacks.EarlyStopping(
-    monitor="val_accuracy", patience=5, mode="max", restore_best_weights=True
+    monitor="val_accuracy", patience=10, mode="max", restore_best_weights=True
 )
 ckpt = callbacks.ModelCheckpoint(
     MODEL_PATH.as_posix(),
