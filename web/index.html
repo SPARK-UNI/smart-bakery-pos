@@ -1,63 +1,95 @@
-<!-- web/index.html -->
 <!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Bakery Recognition POS</title>
-  <link rel="stylesheet" href="style.css"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bakery POS (Linh hoạt khay + Thanh toán)</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
     <header class="header">
-      <h1>Bakery Recognition POS</h1>
+      <h1>Bakery POS</h1>
       <div class="status" id="status">
         <span class="status-dot offline"></span>
         Camera Offline
       </div>
     </header>
 
-    <!-- phần còn lại giữ nguyên -->
-    <main class="main">
-      <div class="video-section">
-        <div class="video-container">
-          <video id="video" autoplay muted playsinline></video>
-          <div class="video-placeholder" id="placeholder">
-            <div class="placeholder-icon">📷</div>
-            <p>Nhấn "Start Camera" để bắt đầu</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="controls">
-        <button class="btn btn-primary" id="startBtn">Start Camera</button>
-        <button class="btn btn-secondary" id="predictBtn" disabled>Nhận diện Bánh</button>
-        <button class="btn btn-outline" id="stopBtn" disabled>Stop Camera</button>
-
-        <!-- ▼ Thêm mới: upload ảnh -->
-        <input type="file" id="fileInput" accept="image/*" hidden />
-        <button class="btn btn-outline" id="uploadBtn">Upload Image</button>
-      </div>
-
-      <!-- ▼ Thêm mới: khung preview ảnh upload -->
-      <div class="upload-preview hidden" id="uploadPreviewWrap">
-        <img id="uploadPreview" alt="Preview" />
-      </div>
-
-      <div class="result-section">
-        <div class="result-card">
-          <h3>Kết quả</h3>
-          <div class="result-content">
-            <div class="loading hidden" id="loading">
-              <div class="spinner"></div>
-              <span>Processing...</span>
+    <main class="main-grid">
+      <div class="col-left">
+        <!-- Camera + Ảnh khay -->
+        <section class="card">
+          <div class="viewport">
+            <video id="video" autoplay muted playsinline></video>
+            <img id="viewportImg" alt="Ảnh khay" class="hidden" />
+            <div class="video-placeholder" id="placeholder">
+              <div class="placeholder-icon">📷</div>
+              <p>Nhấn "Khởi động Camera" để bắt đầu</p>
             </div>
-            <div class="result-text" id="result">No data available</div>
+            <div class="overlay-toolbar hidden" id="overlayToolbar">
+              <button class="btn" id="backToCameraBtn">Trở về camera</button>
+            </div>
           </div>
-        </div>
+
+          <div class="controls">
+            <button class="btn btn-primary" id="startBtn">Khởi động Camera</button>
+            <button class="btn btn-outline" id="stopBtn" disabled>Dừng Camera</button>
+            <button class="btn" id="captureTrayBtn" disabled>Chụp khay</button>
+            <input type="file" id="fileInput" accept="image/*" hidden />
+            <button class="btn" id="uploadBtn">Tải ảnh khay</button>
+
+            <!-- Chọn loại khay -->
+            <select id="trayLayout" class="btn">
+              <option value="auto6">Khay 6 ô đều</option>
+              <option value="manual5" selected>Khay 5 ô inox</option>
+            </select>
+          </div>
+        </section>
+
+        <!-- Khay nhận diện -->
+        <section class="card">
+          <div class="row-title">
+            <h3>Tự động nhận diện khay</h3>
+          </div>
+          <div class="tray-grid" id="trayGrid"></div>
+        </section>
+      </div>
+
+      <div class="col-right">
+        <section class="card">
+          <h3>Hóa đơn</h3>
+          <div id="billItems"></div>
+          <div class="bill-total">Tổng: <span id="billTotal">0</span> đ</div>
+
+          <hr class="sep"/>
+
+          <h3>Thanh toán</h3>
+          <div class="payment">
+            <div class="pay-methods" id="payMethods">
+              <label class="chip"><input type="radio" name="pay" value="cash" checked> Tiền mặt</label>
+              <label class="chip"><input type="radio" name="pay" value="card"> Quẹt thẻ</label>
+              <label class="chip"><input type="radio" name="pay" value="transfer"> Chuyển khoản</label>
+            </div>
+
+            <div class="pay-cash" id="payCash">
+              <label>Khách đưa (đ): <input type="number" id="cashGiven" min="0" placeholder="0"/></label>
+              <div class="muted">Tiền thừa: <strong id="changeDue">0</strong> đ</div>
+            </div>
+
+            <div class="pay-transfer hidden" id="payTransfer">
+              <img id="qrImage" src="img/qr.png" alt="QR chuyển khoản">
+              <p class="muted">Quét mã để thanh toán chuyển khoản.</p>
+            </div>
+
+            <button class="btn btn-primary full" id="payBtn">Thanh toán</button>
+            <div id="payStatus" class="muted" style="margin-top:6px;"></div>
+          </div>
+        </section>
       </div>
     </main>
   </div>
+
   <script src="script.js"></script>
 </body>
 </html>

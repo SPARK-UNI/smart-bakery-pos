@@ -9,6 +9,10 @@ data/test/**
 data/train/**
 data/valid/**
 
+web2/**
+hinh_khay/**
+
+
 # === MODELS ===
 models/**
 !models/.gitkeep
@@ -26,6 +30,7 @@ models/**
 # === IGNORE SPECIFIC PYTHON FILES ===
 arrange.py
 gpu.py
+tray_box_annotator.py
 
 # === PYTHON / ENVIRONMENT ===
 __pycache__/
