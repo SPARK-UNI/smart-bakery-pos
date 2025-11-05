@@ -1,4 +1,4 @@
-// === script.js (Auto-add + canonical dropdown update) ===
+// === script.js (Gộp nút nhưng giữ nguyên toàn bộ chức năng) ===
 class BakeryRecognition {
   constructor() {
     this.apiURL = (window.location.origin || 'http://127.0.0.1:5000');
@@ -6,14 +6,14 @@ class BakeryRecognition {
     // Elements
     this.video = document.getElementById('video');
     this.viewportImg = document.getElementById('viewportImg');
-    this.overlayToolbar = document.getElementById('overlayToolbar');
-    this.backToCameraBtn = document.getElementById('backToCameraBtn');
 
-    this.startBtn = document.getElementById('startBtn');
-    this.stopBtn = document.getElementById('stopBtn');
+    // Nút gộp
+    this.cameraToggleBtn = document.getElementById('cameraToggleBtn');
+    this.captureToggleBtn = document.getElementById('captureToggleBtn');
+
+    // Upload
     this.uploadBtn = document.getElementById('uploadBtn');
     this.fileInput = document.getElementById('fileInput');
-    this.captureTrayBtn = document.getElementById('captureTrayBtn');
 
     this.placeholder = document.getElementById('placeholder');
     this.status = document.getElementById('status');
@@ -34,7 +34,7 @@ class BakeryRecognition {
     this.stream = null;
     this.traySlices = [];
     this.trayOverrides = [];
-    this.mode = 'camera';
+    this.mode = 'camera'; // 'camera' | 'image'
 
     // Prices (display keys are the dropdown values)
     this.PRICE_MAP = {
@@ -53,7 +53,7 @@ class BakeryRecognition {
 
     // Build canonical map to match any model label (lowercase, no accents) to dropdown value
     this.CANONICAL = this.buildCanonical();
-    this.CONF_THRESHOLD = 0.60;
+    this.CONF_THRESHOLD = 0.50;
 
     this.init();
   }
@@ -78,8 +78,7 @@ class BakeryRecognition {
     add('banh da lon','Bánh da lợn');
     add('muffin viet quat','Muffin Việt Quất');
     add('banh chuoi nuong','Bánh chuối nướng');
-    add('banh mi bo cua lon','Bánh mì bơ ( Cua lớn )');
-    add('banh mi bo','Bánh mì bơ ( Cua lớn )');
+    add('banh cua bo','Bánh mì bơ ( Cua lớn )');
     return map;
   }
   normalizeVN(str){
@@ -97,53 +96,95 @@ class BakeryRecognition {
   }
 
   init(){
-    this.startBtn?.addEventListener('click', ()=>this.startCamera());
-    this.stopBtn?.addEventListener('click', ()=>this.stopCamera());
+    // Toggle camera (Bật/Tắt)
+    this.cameraToggleBtn?.addEventListener('click', ()=>this.toggleCamera());
+    // Toggle capture (Chụp khay/Trở về camera)
+    this.captureToggleBtn?.addEventListener('click', ()=>this.toggleCapture());
+
+    // Upload
     this.uploadBtn?.addEventListener('click', ()=>this.fileInput.click());
     this.fileInput?.addEventListener('change', e=>this.handleUpload(e.target.files));
-    this.captureTrayBtn?.addEventListener('click', ()=>this.handleCapture());
-    this.backToCameraBtn?.addEventListener('click', ()=>this.showCamera());
 
+    // Payment
     document.querySelectorAll('input[name="pay"]').forEach(r=>r.addEventListener('change', ()=>this.onPayMethodChange()));
     this.cashGiven?.addEventListener('input', ()=>this.updateChangeDue());
     this.payBtn?.addEventListener('click', ()=>this.onPay());
+
+    // Khởi tạo trạng thái nút
+    this.setCaptureBtnEnabled(false);
   }
 
+  // ======== Toggle buttons ========
+  async toggleCamera(){
+    if (!this.stream){
+      await this.startCamera();
+    } else {
+      this.stopCamera();
+    }
+  }
+  async toggleCapture(){
+    if (this.mode === 'camera'){
+      await this.handleCapture();       // chụp + nhận diện
+      this.captureToggleBtn.textContent = 'Trở về camera';
+    } else {
+      this.showCamera();                // quay lại video
+      this.captureToggleBtn.textContent = 'Chụp khay';
+    }
+  }
+
+  // ======== View state helpers ========
   showImage(dataURL){
     this.viewportImg.src = dataURL;
     this.viewportImg.classList.remove('hidden');
-    this.overlayToolbar.classList.remove('hidden');
+    this.video.classList.add('hidden');
     this.mode = 'image';
   }
   showCamera(){
     this.viewportImg.classList.add('hidden');
-    this.overlayToolbar.classList.add('hidden');
+    this.video.classList.remove('hidden');
     this.mode = 'camera';
   }
 
+  // ======== Camera control ========
   async startCamera(){
     try{
-      this.startBtn.disabled = true;
+      this.cameraToggleBtn.disabled = true;
+      this.cameraToggleBtn.textContent = 'Đang bật...';
       this.stream = await navigator.mediaDevices.getUserMedia({ video:{ width:{ideal:1280}, height:{ideal:720}, facingMode:'environment' } });
       this.video.srcObject = this.stream;
       this.placeholder.classList.add('hidden');
-      this.stopBtn.disabled = false; this.captureTrayBtn.disabled = false;
       this.updateStatus(true);
+      this.setCaptureBtnEnabled(true);
+      this.cameraToggleBtn.textContent = 'Tắt Camera';
       if (this.mode !== 'image') this.showCamera();
-    }catch(e){ alert('Không thể mở camera'); this.startBtn.disabled=false; }
+    }catch(e){
+      alert('Không thể mở camera');
+    } finally {
+      this.cameraToggleBtn.disabled = false;
+    }
   }
   stopCamera(){
     if (this.stream) this.stream.getTracks().forEach(t=>t.stop());
     this.stream=null; this.video.srcObject=null;
     this.placeholder.classList.remove('hidden');
-    this.startBtn.disabled=false; this.stopBtn.disabled=true; this.captureTrayBtn.disabled=true;
     this.updateStatus(false);
+    // Khi tắt camera, nếu đang ở chế độ image thì giữ nguyên ảnh;
+    // nhưng nút chụp không còn tác dụng -> disable
+    this.setCaptureBtnEnabled(false);
+    this.cameraToggleBtn.textContent = 'Bật Camera';
+  }
+  setCaptureBtnEnabled(on){
+    this.captureToggleBtn.disabled = !on;
+    if (!on) this.captureToggleBtn.textContent = 'Chụp khay';
   }
   updateStatus(on){
-    this.status.innerHTML = `<span class=\"status-dot ${on?'online':'offline'}\"></span>${on?'Camera Online':'Camera Offline'}`;
+    this.status.innerHTML = `<span class="status-dot ${on?'online':'offline'}"></span>${on?'Camera Online':'Camera Offline'}`;
   }
 
+  // ======== Chụp & Nhận diện ========
   async handleCapture(){
+    // Chỉ chụp khi đang có camera
+    if (!this.stream){ return; }
     const dataURL = this.captureFrame();
     this.showImage(dataURL);
     const layout = document.getElementById('trayLayout')?.value || 'auto6';
@@ -166,6 +207,8 @@ class BakeryRecognition {
       this.showImage(dataURL);
       const layout = document.getElementById('trayLayout')?.value || 'auto6';
       await this.splitRecognizeAndRender(dataURL, layout);
+      // Cho phép quay về camera nếu camera đang bật
+      if (this.stream){ this.captureToggleBtn.textContent = 'Trở về camera'; this.captureToggleBtn.disabled = false; }
     };
     reader.readAsDataURL(file);
   }
@@ -295,7 +338,7 @@ class BakeryRecognition {
     Object.entries(counts).forEach(([name,qty])=>{
       const price=this.PRICE_MAP[name]||0;
       const row=document.createElement('div'); row.className='row';
-      row.innerHTML=`<span>${name}</span><span class=\"qty\">x${qty}</span><span class=\"price\">${(price*qty).toLocaleString('vi-VN')}</span>`;
+      row.innerHTML=`<span>${name}</span><span class="qty">x${qty}</span><span class="price">${(price*qty).toLocaleString('vi-VN')}</span>`;
       this.billItems.appendChild(row);
       total+=price*qty;
     });

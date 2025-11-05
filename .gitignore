@@ -13,19 +13,19 @@ web2/**
 hinh_khay/**
 
 
-# === MODELS ===
-models/**
-!models/.gitkeep
-!models/labels.txt
+# # === MODELS ===
+# models/**
+# !models/.gitkeep
+# !models/labels.txt
 
-# Ignore large model files
-*.h5
-*.hdf5
-*.pt
-*.pth
-*.onnx
-*.pkl
-*.joblib
+# # Ignore large model files
+# *.h5
+# *.hdf5
+# *.pt
+# *.pth
+# *.onnx
+# *.pkl
+# *.joblib
 
 # === IGNORE SPECIFIC PYTHON FILES ===
 arrange.py

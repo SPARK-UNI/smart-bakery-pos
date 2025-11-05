@@ -25,17 +25,16 @@
             <img id="viewportImg" alt="Ảnh khay" class="hidden" />
             <div class="video-placeholder" id="placeholder">
               <div class="placeholder-icon">📷</div>
-              <p>Nhấn "Khởi động Camera" để bắt đầu</p>
-            </div>
-            <div class="overlay-toolbar hidden" id="overlayToolbar">
-              <button class="btn" id="backToCameraBtn">Trở về camera</button>
+              <p>Nhấn "Bật Camera" để bắt đầu</p>
             </div>
           </div>
 
           <div class="controls">
-            <button class="btn btn-primary" id="startBtn">Khởi động Camera</button>
-            <button class="btn btn-outline" id="stopBtn" disabled>Dừng Camera</button>
-            <button class="btn" id="captureTrayBtn" disabled>Chụp khay</button>
+            <!-- Gộp Khởi động/Dừng camera -->
+            <button class="btn btn-primary" id="cameraToggleBtn">Bật Camera</button>
+            <!-- Gộp Chụp khay/Trở về camera -->
+            <button class="btn" id="captureToggleBtn" disabled>Chụp khay</button>
+
             <input type="file" id="fileInput" accept="image/*" hidden />
             <button class="btn" id="uploadBtn">Tải ảnh khay</button>
 
