@@ -40,7 +40,7 @@ VAL_DIR   = DATA_DIR / "valid"
 TEST_DIR  = DATA_DIR / "test"
 
 # Thư mục lưu model/labels
-MODELS_DIR = Path("models")
+MODELS_DIR = Path("models/keras2")
 MODELS_DIR.mkdir(parents=True, exist_ok=True)
 MODEL_PATH = MODELS_DIR / "bakery_cnn.h5"
 LABELS_PATH = MODELS_DIR / "labels.txt"

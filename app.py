@@ -5,7 +5,7 @@ from keras.models import load_model
 
 app = Flask(__name__, static_folder="web", static_url_path="")
 
-MODELS_DIR = Path("models")
+MODELS_DIR = Path("models\keras2")
 MODEL_PATH = MODELS_DIR / "bakery_cnn.h5"
 LABELS_PATH = MODELS_DIR / "labels.txt"
 
